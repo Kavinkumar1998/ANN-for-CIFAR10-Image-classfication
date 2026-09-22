@@ -1,6 +1,7 @@
 .venv/
-ipnc/
+ipnb/
 .ipynb/
 data/
-models/
+model/
 .env
+models/*.h5
