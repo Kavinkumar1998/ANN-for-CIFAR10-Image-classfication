@@ -1,35 +1,57 @@
-# %%
+from __future__ import annotations
+
 import os
+
+from keras.layers import Dense, Flatten, Input
 from keras.models import Sequential
-from keras.layers import Flatten,Dense
-import src.models.config as config
+
 from src.features.data_loader import load_and_normalize_dataset
-# %%
+from src.models import config
+
+
 def build_cfr_ann():
-    model = Sequential()
-    model.add(Flatten(input_shape=config.INPUT_SHAPE))
-    model.add(Dense(units=300,activation="relu"))
-    model.add(Dense(units=150,activation="relu"))
-    model.add(Dense(units=75,activation="relu"))
-    model.add(Dense(units=36,activation="relu"))
-    model.add(Dense(units=300,activation="softmax"))
-    model.compile(optimizer=config.Optimizers,loss=config.loss,metrics=config.metrics)
+    model = Sequential(
+        [
+            Input(shape=config.INPUT_SHAPE),
+            Flatten(),
+            Dense(units=300, activation="relu"),
+            Dense(units=150, activation="relu"),
+            Dense(units=75, activation="relu"),
+            Dense(units=36, activation="relu"),
+            Dense(units=config.NUM_CLASSES, activation="softmax"),
+        ]
+    )
+    model.compile(
+        optimizer=config.OPTIMIZER,
+        loss=config.LOSS,
+        metrics=config.METRICS,
+    )
     return model
 
+
 def run_model_pipeline():
-    x_train,y_train = load_and_normalize_dataset()[0]
-    x_test,y_test = load_and_normalize_dataset()[1]
-    print("compiling model")
-    model=build_cfr_ann()
-    print("fitting model")
-    model.fit(x=x_train,y=y_train,batch_size=config.Batch_size,epochs=config.Epochs,validation_data=(x_test,y_test))
+    (x_train, y_train), (x_test, y_test) = load_and_normalize_dataset()
+
+    print("Compiling model...")
+    model = build_cfr_ann()
+
+    print("Training model...")
+    model.fit(
+        x=x_train,
+        y=y_train,
+        batch_size=config.BATCH_SIZE,
+        epochs=config.EPOCHS,
+        validation_data=(x_test, y_test),
+    )
+
     model.summary()
-    os.makedirs(os.path.dirname(config.Model_Path), exist_ok=True)
-    print(f"Saving artifacts to: {config.Model_Path}")
-    model.save(config.Model_Path)
+
+    os.makedirs(config.MODEL_DIR, exist_ok=True)
+    print(f"Saving model to: {config.MODEL_PATH}")
+    model.save(config.MODEL_PATH)
     print("Pipeline sequence completed successfully.")
+
 
 if __name__ == "__main__":
     run_model_pipeline()
 
-# %%
