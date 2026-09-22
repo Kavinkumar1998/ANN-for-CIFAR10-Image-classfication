@@ -1,0 +1,6 @@
+.venv/
+ipnc/
+.ipynb/
+data/
+models/
+.env
